@@ -9,4 +9,3 @@ class SistemaDeRegistro:
         
     def creat_table(self):
         self.c.execute()
-        
