@@ -28,4 +28,7 @@ class SistemaDeRegistro:
         messagebox.showinfo('sucesso', 'Registro com sucesso!')
         
         def view_all_students(self):
-            self.c.execut("SELECT *")
+            self.c.execut("SELECT * FROM estudantes")
+            dados = self.c.fetchall()
+            for i in dados:
+                print(f'ID : {i[0]} | Nome : {i[1]} | Email: {i[2]} | Tel: {i[3]} | Sexo: {i[4]} | Data de nascimento: {i[5]} | Endereco: {i[6]} | Curso: {i[7]} | Picture: {i[8]}')
