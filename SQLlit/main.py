@@ -35,15 +35,15 @@ class SistemaDeRegistro:
            print(f'ID : {i[0]} | Nome : {i[1]} | Email: {i[2]} | Tel: {i[3]} | Sexo: {i[4]} | Data de nascimento: {i[5]} | Endereco: {i[6]} | Curso: {i[7]} | Picture: {i[8]}')
 
     def search_student(self, id):
-     self.c.execut("SELECT * FROM estudantes WHERE id=?", (id))
+     self.c.execute("SELECT * FROM estudantes WHERE id=?", (id,))
      dados = self.c.fetchone()
-            
+
      print(f'ID : {dados[0]} | Nome : {dados[1]} | Email: {dados[2]} | Tel: {dados[3]} | Sexo: {dados[4]} | Data de nascimento: {dados[5]} | Endereco: {dados[6]} | Curso: {dados[7]} | Picture: {dados[8]}')
 
 
     def update_students(self, nova_valores):
-        query = "UPDATE estudantes SET nome=?, email=?, tel=?, sexo=?, data_nascimento=?, curso=?, picture=? WERW id=?"
-        self.c.execute(query, nova_valores)
+        query = "UPDATE estudantes SET nome=?, email=?, tel=?, sexo=?, data_nascimento=?, endereco=?,  curso=?, picture=? WHERE id=? "
+        self.c.execute(query,nova_valores)
         self.conn.commit()
 
         #mostrando mensagem de suscesso
@@ -60,7 +60,7 @@ class SistemaDeRegistro:
 sistema_de_registro = SistemaDeRegistro()
 
 #informacoes
-#estudante = ('joao', 'joao@gmail.com', '1234', 'M', '01/05/2005', 'Belo horizonte', 'informatica', "imagem.png")
+#estudante = ('elena', 'elena@gmail.com', '4321', 'M', '18/05/2007', 'angola', 'enfermagem', "imagem2.png")
 
 #sistema_de_registro.register_estudent(estudante)
 
@@ -70,7 +70,7 @@ sistema_de_registro = SistemaDeRegistro()
 # procurar aluno
 #aluno = sistema_de_registro.search_student(2)
 
-# atualizar aluno
-# estudante = ('joao', 'joao@gmail.com', '4321', 'M', '01/05/2005', 'Belo horizonte', 'informatica', 'imagem.png' 2)
+# Atualizar aluno
+estudante = ('elena', 'elena@gmail.com', '555', 'F', '18/05/2007', 'angola', 'enfermagem', "imagem2.png", 2)
 
-# aluno = sistema_de_registro.update_students(estudante)
+aluno = sistema_de_registro.update_students(estudante)
