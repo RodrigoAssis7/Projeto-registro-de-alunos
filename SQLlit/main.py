@@ -71,6 +71,10 @@ sistema_de_registro = SistemaDeRegistro()
 #aluno = sistema_de_registro.search_student(2)
 
 # Atualizar aluno
-estudante = ('elena', 'elena@gmail.com', '555', 'F', '18/05/2007', 'angola', 'enfermagem', "imagem2.png", 2)
+#estudante = ('elena', 'elena@gmail.com', '555', 'F', '18/05/2007', 'angola', 'enfermagem', "imagem2.png", 2)
+#aluno = sistema_de_registro.update_students(estudante)
 
-aluno = sistema_de_registro.update_students(estudante)
+sistema_de_registro.delete_student(1)
+
+# ver estudante
+todos_alunos = sistema_de_registro.view_all_students()
