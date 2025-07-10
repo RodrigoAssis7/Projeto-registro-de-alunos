@@ -1,4 +1,5 @@
 # importando dependencias do tkinter
+from cProfile import label
 from tkinter.ttk import *
 from tkinter import*
 from tkinter import ttk
@@ -51,7 +52,7 @@ frame_detalhes.grid(row=1, column=1, pady=1, padx=10, sticky=NSEW)
 frame_tabela = Frame(janela, width=800, height=100, bg=co1, relief=SOLID)
 frame_tabela.grid(row=3, column=0, pady=0, padx=10, sticky=NSEW, columnspan=5)
 
-# Logo frame
+# Logo frame----------------------------
 global imagem, imagem_string, l_imagem
 
 app_lg = Image.open('logo.png')
@@ -59,5 +60,11 @@ app_lg = app_lg.resize((50,50))
 app_lg = ImageTk.PhotoImage(app_lg)
 app_logo = Label(frame_logo, image=app_lg, text="Sitema de Registro de Alunos", width=850, compound=LEFT, anchor=NW, font=('Verdane 15'), bg=co6, fg=co1)
 app_logo.place(x=5, y=0)
+
+
+#criando campos de entrada-------------------------
+
+l_nome = Label(frame_detalhes, text="Nome *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
+l_nome.place(x=4, y=10)
 
 janela.mainloop()
