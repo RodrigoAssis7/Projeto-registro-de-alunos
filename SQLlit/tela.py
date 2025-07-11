@@ -69,5 +69,56 @@ l_nome.place(x=4, y=10)
 e_nome = Entry(frame_detalhes, width=30, justify='left', relief='solid')
 e_nome.place(x=7, y=40)
 
+l_email = Label(frame_detalhes, text="Email *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
+l_email.place(x=4, y=70)
+e_email = Entry(frame_detalhes, width=30, justify='left', relief='solid')
+e_email.place(x=7, y=100)
+
+l_tel = Label(frame_detalhes, text="Telefone *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
+l_tel.place(x=4, y=130)
+e_tel = Entry(frame_detalhes, width=15, justify='left', relief='solid')
+e_tel.place(x=7, y=160)
+
+l_sexo = Label(frame_detalhes, text="Sexo *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
+l_sexo.place(x=127, y=130)
+c_sexo = ttk.Combobox(frame_detalhes, width=7, font=('Ivy 8 bold'), justify='center')
+c_sexo['values'] = ('M', 'S')
+c_sexo.place(x=130, y=160)
+
+l_data_de_nascimento = Label(frame_detalhes, text="Data de Nascimento *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
+l_data_de_nascimento.place(x=220, y=10)
+data_nascimento = DateEntry(frame_detalhes, width=18, justify='center', background='darkblue', foreground='white', borderwidth=2, year=2023)
+data_nascimento.place(x=224, y=40)
+
+l_endereco = Label(frame_detalhes, text="Endereço *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
+l_endereco.place(x=220, y=70)
+l_endereco = Entry(frame_detalhes, width=20, justify='left', relief='solid')
+l_endereco.place(x=224, y=100)
+
+cursos = ['Engenharia', 'Medicina', 'T.I.', 'Designer', 'Outros']
+
+l_curso = Label(frame_detalhes, text="Curso *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
+l_curso.place(x=220, y=130)
+c_curso = ttk.Combobox(frame_detalhes, width=20, font=('Ivy 8 bold'), justify='center')
+c_curso['values'] = (cursos)
+c_curso.place(x=224, y=160)
+
+# Função para escolher imagem
+
+def escolher_imagem():
+    global imagem, imagem_string, l_imagem
+
+    imagem = fd.askopenfilename()
+    imagem_string=imagem
+
+    imagem = Image.open(imagem)
+    imagem = imagem.resize((130, 130))
+    imagem = ImageTk.PhotoImage(imagem)
+    l_imagem = Label(frame_detalhes,  bg=co1, fg=co4)
+    l_imagem.place(x=390, y=10)
+
+botao_carregar = Button(frame_detalhes, command=escolher_imagem, text='Carregar Foto'.upper(), width=20, compound=CENTER, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co1, fg=co0)
+botao_carregar.place(x=390, y=160)
+
 
 janela.mainloop()
