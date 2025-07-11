@@ -117,8 +117,42 @@ def escolher_imagem():
     l_imagem = Label(frame_detalhes,  bg=co1, fg=co4)
     l_imagem.place(x=390, y=10)
 
+    botao_carregar['text'] = 'Trocar de foto'
+
 botao_carregar = Button(frame_detalhes, command=escolher_imagem, text='Carregar Foto'.upper(), width=20, compound=CENTER, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co1, fg=co0)
 botao_carregar.place(x=390, y=160)
+
+# Tabela aluno
+
+def mostrar_alino(registration_system=None):
+
+    list_header = ['id','nome', 'email', 'telefone', 'sexo', 'data', 'endereço' 'curso']
+
+    df_list = []
+
+    tree_aluno = ttk.Treeview(frame_tabela, selectmode="extended",columns=list_header, show='headings')
+
+    vbs = ttk.Scrollbar(frame_tabela, orient="vertical", command=tree_aluno.yview)
+    hsb = ttk.Scrollbar(frame_tabela, orient="horizontal", command=tree_aluno.xview)
+
+    tree_aluno.configure(yscrollcommand=vbs.set, xscrollcommand=hsb.set)
+    tree_aluno.grid(column=0, row=1, sticky='nsew')
+    vbs.grid(column=1, row=1, sticky='ns')
+    hsb.grid(column=0, row=2, sticky='ew')
+    frame_tabela.grid_rowconfigure(0, weight=12)
+
+    hd=['nw','nw','nw','center','center','center','center','center','center']
+    h=[40,150,150,70,70,70,120,100,100]
+    n=0
+
+    for col in list_header:
+     tree_aluno.heading(col, text=col.title(), anchor=NW)
+     tree_aluno.column(col, width=h[n], anchor=hd[n])
+
+    n+=1
+    for item in df_list:
+        tree_aluno.insert('','end', values=item)
+
 
 
 janela.mainloop()
