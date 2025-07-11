@@ -66,5 +66,8 @@ app_logo.place(x=5, y=0)
 
 l_nome = Label(frame_detalhes, text="Nome *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
 l_nome.place(x=4, y=10)
+e_nome = Entry(frame_detalhes, width=30, justify='left', relief='solid')
+e_nome.place(x=7, y=40)
+
 
 janela.mainloop()
