@@ -61,6 +61,13 @@ app_lg = ImageTk.PhotoImage(app_lg)
 app_logo = Label(frame_logo, image=app_lg, text="Sitema de Registro de Alunos", width=850, compound=LEFT, anchor=NW, font=('Verdane 15'), bg=co6, fg=co1)
 app_logo.place(x=5, y=0)
 
+#abrindo imagem
+
+imagem = Image.open('logo.png')
+imagem = imagem.resize((130, 130))
+imagem = ImageTk.PhotoImage(imagem)
+l_imagem = Label(frame_detalhes, bg=co1, fg=co4)
+l_imagem.place(x=390, y=10)
 
 #criando campos de entrada-------------------------
 
@@ -124,7 +131,7 @@ botao_carregar.place(x=390, y=160)
 
 # Tabela aluno
 
-def mostrar_alino(registration_system=None):
+def mostrar_aluno(registration_system=None):
 
     list_header = ['id','nome', 'email', 'telefone', 'sexo', 'data', 'endereço' 'curso']
 
@@ -149,10 +156,52 @@ def mostrar_alino(registration_system=None):
      tree_aluno.heading(col, text=col.title(), anchor=NW)
      tree_aluno.column(col, width=h[n], anchor=hd[n])
 
-    n+=1
+     n+=1
     for item in df_list:
         tree_aluno.insert('','end', values=item)
 
 
+
+#procurar aluno------------------------
+
+frame_procurar = Frame(frame_botoes, width=40, height=55, bg=co1, relief=RAISED)
+frame_procurar.grid(row=0, column=0, pady=10, padx=10, sticky=NSEW)
+
+l_nome = Label(frame_procurar, text="Procurar aluno [Entra ID]", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
+l_nome.grid(row=0, column=0, pady=10, padx=0, sticky=NSEW)
+e_procurar = Entry(frame_procurar, width=5, justify='center', relief='solid', font=('Ivy 10'))
+e_procurar.grid(row=1, column=0, pady=10, padx=0, sticky=NSEW)
+
+botao_alterar = Button(frame_procurar, text='Procurar', width=9, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co1, fg=co0)
+botao_alterar.grid(row=1, column=1, pady=10, padx=0, sticky=NSEW)
+
+
+# Botoes --------------
+
+app_img_adicionar = Image.open('add.png')
+app_img_adicionar = app_img_adicionar.resize((25,25))
+app_img_adicionar = ImageTk.PhotoImage(app_img_adicionar)
+app_adicionar = Button(frame_botoes,imag=app_img_adicionar, text=' adicionar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
+app_adicionar.grid(row=1, column=0, pady=5, padx=10, sticky=NSEW)
+
+app_img_atualizar = Image.open('update.png')
+app_img_atualizar = app_img_atualizar.resize((25,25))
+app_img_atualizar = ImageTk.PhotoImage(app_img_atualizar)
+app_atualizar  = Button(frame_botoes,imag=app_img_atualizar, text=' Atualizar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
+app_atualizar .grid(row=2, column=0, pady=5, padx=10, sticky=NSEW)
+
+app_img_deletar = Image.open('delete.png')
+app_img_deletar = app_img_deletar.resize((25,25))
+app_img_deletar = ImageTk.PhotoImage(app_img_deletar)
+app_deletar = Button(frame_botoes,imag=app_img_deletar, text=' Deletar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
+app_deletar.grid(row=3, column=0, pady=5, padx=10, sticky=NSEW)
+
+#linha de separação
+l_linha= Label(frame_botoes, width=1, height=123, anchor=NW,font=('Ivy 1'), bg=co2, fg=co2)
+l_linha.place(x=230, y=15)
+
+
+#chamar a tabela
+mostrar_aluno()
 
 janela.mainloop()
