@@ -13,6 +13,8 @@ from PIL import ImageTk, Image
 from tkcalendar import Calendar, DateEntry
 from datetime import date
 
+#importando main
+from main import *
 
 #cores
 co0 = "#2e2d2b"  # Preta
@@ -68,6 +70,45 @@ imagem = imagem.resize((130, 130))
 imagem = ImageTk.PhotoImage(imagem)
 l_imagem = Label(frame_detalhes, bg=co1, fg=co4)
 l_imagem.place(x=390, y=10)
+
+
+#-------------criando funçoes para CRUD-----------------
+#função adicionar
+def adicionar(e_endereco=None):
+    global imagem, imagem_string, l_imagem
+
+#obtendo os valores
+    nome = e_nome.get()
+    email = e_email.get()
+    tel = e_tel.get()
+    sexo = c_sexo.get()
+    data = data_nascimento.get()
+    endereco = e_endereco.get()
+    curso = c_curso.get()
+    img = imagem_string
+
+    lista = [nome, email, tel, sexo, data, curso, img]
+
+    #verificando se contem valor vazio
+    for i in lista:
+        if i=='':
+            messagebox.showerror('Erro', 'Preencha todos os campos')
+            return
+
+    #registrando os valores
+    sistema_de_registro.register_estudent(lista)
+
+    #limpamdo os campos de entrada
+    e_nome.delete(0, END)
+    e_email.delete(0, END)
+    e_tel.delete(0, END)
+    c_sexo.delete(0, END)
+    data_nascimento.delete(0, END)
+    e_endereco.delete(0, END)
+    c_curso.delete(0, END)
+
+    #mostrando os valores
+    mostrar_aluno()
 
 #criando campos de entrada-------------------------
 
@@ -135,7 +176,7 @@ def mostrar_aluno(registration_system=None):
 
     list_header = ['id','nome', 'email', 'telefone', 'sexo', 'data', 'endereço' 'curso']
 
-    df_list = []
+    df_list = sistema_de_registro.view_all_students()
 
     tree_aluno = ttk.Treeview(frame_tabela, selectmode="extended",columns=list_header, show='headings')
 
@@ -181,7 +222,7 @@ botao_alterar.grid(row=1, column=1, pady=10, padx=0, sticky=NSEW)
 app_img_adicionar = Image.open('add.png')
 app_img_adicionar = app_img_adicionar.resize((25,25))
 app_img_adicionar = ImageTk.PhotoImage(app_img_adicionar)
-app_adicionar = Button(frame_botoes,imag=app_img_adicionar, text=' adicionar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
+app_adicionar = Button(frame_botoes,command= adicionar,imag=app_img_adicionar, text=' adicionar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
 app_adicionar.grid(row=1, column=0, pady=5, padx=10, sticky=NSEW)
 
 app_img_atualizar = Image.open('update.png')
