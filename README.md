@@ -1,3 +1,5 @@
+#Esta em andamento 
+
   #  Sistema de Registro de Alunos
 Este é um projeto educacional desenvolvido 100% em Python, com o objetivo de simular um sistema real de cadastro e gerenciamento de alunos, trabalhando com conceitos fundamentais da programação.
 
