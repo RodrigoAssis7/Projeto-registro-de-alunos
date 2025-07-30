@@ -74,8 +74,12 @@ l_imagem.place(x=390, y=10)
 
 #-------------criando funçoes para CRUD-----------------
 #função adicionar
-def adicionar(e_endereco=None):
+def adicionar():
     global imagem, imagem_string, l_imagem
+    global e_endereco
+
+    if 'imagem_string' not in globals():
+        imagem_string = "logo.png"
 
     #obtendo os valores
     nome = e_nome.get()
@@ -108,11 +112,12 @@ def adicionar(e_endereco=None):
     c_curso.delete(0, END)
 
     #mostrando os valores
-    mostrar_alunos()
+    mostrar_aluno()
 
 #funcao procurar
 def procurar():
     global imagem, imagem_string, l_imagem
+
 
     # OBTENDO O ID
     id_aluno = int(e_procurar.get())
@@ -149,8 +154,9 @@ def procurar():
     l_imagem.place(x=390, y=10)
 
 # função atualizar
-def atualizar(e_endereco=None):
+def atualizar():
     global imagem, imagem_string, l_imagem
+    global e_endereco
 
     # OBTENDO O ID
     id_aluno = int(e_procurar.get())
@@ -194,12 +200,13 @@ def atualizar(e_endereco=None):
     l_imagem.place(x=390, y=10)
 
     #mostrando os valores
-    mostrar_alunos()
+    mostrar_aluno()
 
 
 # função deletar
-def deletar(e_endereco=None):
+def deletar():
     global imagem, imagem_string, l_imagem
+    global e_endereco
 
     # OBTENDO O ID
     id_aluno = int(e_procurar.get())
@@ -259,8 +266,10 @@ data_nascimento.place(x=224, y=40)
 
 l_endereco = Label(frame_detalhes, text="Endereço *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
 l_endereco.place(x=220, y=70)
-l_endereco = Entry(frame_detalhes, width=20, justify='left', relief='solid')
-l_endereco.place(x=224, y=100)
+
+e_endereco = Entry(frame_detalhes, width=20, justify='left', relief='solid')
+e_endereco.place(x=224, y=100)
+
 
 cursos = ['Engenharia', 'Medicina', 'T.I.', 'Designer', 'Outros']
 
@@ -341,19 +350,19 @@ botao_procurar.grid(row=1, column=1, pady=10, padx=0, sticky=NSEW)
 app_img_adicionar = Image.open('add.png')
 app_img_adicionar = app_img_adicionar.resize((25,25))
 app_img_adicionar = ImageTk.PhotoImage(app_img_adicionar)
-app_adicionar = Button(frame_botoes,command=adicionar,imag=app_img_adicionar, text=' adicionar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
+app_adicionar = Button(frame_botoes,command=adicionar,image=app_img_adicionar, text=' adicionar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
 app_adicionar.grid(row=1, column=0, pady=5, padx=10, sticky=NSEW)
 
 app_img_atualizar = Image.open('update.png')
 app_img_atualizar = app_img_atualizar.resize((25,25))
 app_img_atualizar = ImageTk.PhotoImage(app_img_atualizar)
-app_atualizar  = Button(frame_botoes,command= atualizar, imag=app_img_atualizar, text=' Atualizar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
+app_atualizar  = Button(frame_botoes,command= atualizar, image=app_img_atualizar, text=' Atualizar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
 app_atualizar .grid(row=2, column=0, pady=5, padx=10, sticky=NSEW)
 
 app_img_deletar = Image.open('delete.png')
 app_img_deletar = app_img_deletar.resize((25,25))
 app_img_deletar = ImageTk.PhotoImage(app_img_deletar)
-app_deletar = Button(frame_botoes,command= deletar, imag=app_img_deletar, text=' Deletar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
+app_deletar = Button(frame_botoes,command= deletar, image=app_img_deletar, text=' Deletar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
 app_deletar.grid(row=3, column=0, pady=5, padx=10, sticky=NSEW)
 
 #linha de separação
