@@ -1,5 +1,4 @@
 import sqlite3
-import streamlit as st
 from tkinter import messagebox
 
 class SistemaDeRegistro:

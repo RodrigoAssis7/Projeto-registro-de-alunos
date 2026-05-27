@@ -234,7 +234,7 @@ def deletar():
     l_imagem.place(x=390, y=10)
 
     #mostrando os valores
-    mostrar_alunos()
+    mostrar_aluno()
 
 #criando campos de entrada-------------------------
 
@@ -302,7 +302,7 @@ botao_carregar.place(x=390, y=160)
 
 def mostrar_aluno(registration_system=None):
 
-    list_header = ['id','nome', 'email', 'telefone', 'sexo', 'data', 'endereço' 'curso']
+    list_header = ['id','nome', 'email', 'telefone', 'sexo', 'data', 'endereço', 'curso']
 
     df_list = sistema_de_registro.view_all_students()
 
