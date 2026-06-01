@@ -253,7 +253,7 @@ e_tel.place(x=7, y=160)
 l_sexo = Label(frame_detalhes, text="Sexo *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
 l_sexo.place(x=127, y=130)
 c_sexo = ttk.Combobox(frame_detalhes, width=7, font=('Ivy 8 bold'), justify='center')
-c_sexo['values'] = ('M', 'S')
+c_sexo['values'] = ('M', 'F')
 c_sexo.place(x=130, y=160)
 
 l_data_de_nascimento = Label(frame_detalhes, text="Data de Nascimento *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
