@@ -59,7 +59,7 @@ global imagem, imagem_string, l_imagem
 app_lg = Image.open('logo.png')
 app_lg = app_lg.resize((50,50))
 app_lg = ImageTk.PhotoImage(app_lg)
-app_logo = Label(frame_logo, image=app_lg, text="Sitema de Registro de Alunos", width=850, compound=LEFT, anchor=NW, font=('Verdane 15'), bg=co6, fg=co1)
+app_logo = Label(frame_logo, image=app_lg, text="Sistema de Registro de Alunos", width=850, compound=LEFT, anchor=NW, font=('Verdane 15'), bg=co6, fg=co1)
 app_logo.place(x=5, y=0)
 
 #abrindo imagem
@@ -202,11 +202,14 @@ def atualizar():
 
 # função deletar
 def deletar():
-    global imagem, imagem_string, l_imagem
-    global e_endereco
+    global imagem_string
 
-    # OBTENDO O ID
+    if e_procurar.get() == '':
+        messagebox.showerror('Erro', 'Informe o ID do aluno')
+        return
+
     id_aluno = int(e_procurar.get())
+    # ... resto da função continua igual
 
     #deletando o aluno
     sistema_de_registro.delete_student(id_aluno)
@@ -286,6 +289,15 @@ def escolher_imagem():
 
 botao_carregar = Button(frame_detalhes, command=escolher_imagem, text='Carregar Foto'.upper(), width=20, compound=CENTER, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co1, fg=co0)
 botao_carregar.place(x=390, y=160)
+
+def remover_imagem():
+    global imagem_string
+    imagem_string = 'logo.png'
+    exibir_imagem('logo.png')
+    botao_carregar['text'] = 'Carregar Foto'
+
+botao_remover = Button(frame_detalhes, command=remover_imagem, text='Remover Foto'.upper(), width=20, compound=CENTER, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co7, fg=co1)
+botao_remover.place(x=390, y=190)
 
 # Tabela aluno
 
