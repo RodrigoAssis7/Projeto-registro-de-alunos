@@ -64,14 +64,25 @@ app_logo.place(x=5, y=0)
 
 #abrindo imagem
 
+imagem_string = "logo.png"
 imagem = Image.open('logo.png')
 imagem = imagem.resize((130, 130))
 imagem = ImageTk.PhotoImage(imagem)
-l_imagem = Label(frame_detalhes, bg=co1, fg=co4)
+l_imagem = Label(frame_detalhes, image=imagem, bg=co1, fg=co4)
+l_imagem.image = imagem  # ← impede garbage collection
 l_imagem.place(x=390, y=10)
 
-
 #-------------criando funçoes para CRUD-----------------
+
+def exibir_imagem(caminho):
+    global imagem, imagem_string, l_imagem
+    imagem_string = caminho
+    imagem = Image.open(caminho)
+    imagem = imagem.resize((130, 130))
+    imagem = ImageTk.PhotoImage(imagem)
+    l_imagem.config(image=imagem)
+    l_imagem.image = imagem       
+
 #função adicionar
 def adicionar():
     global imagem, imagem_string, l_imagem
@@ -115,16 +126,9 @@ def adicionar():
 
 #funcao procurar
 def procurar():
-    global imagem, imagem_string, l_imagem
-
-
-    # OBTENDO O ID
     id_aluno = int(e_procurar.get())
-
-    #procurando por aluno
     dados = sistema_de_registro.search_student(id_aluno)
 
-    #limpamdo os campos de entrada
     e_nome.delete(0, END)
     e_email.delete(0, END)
     e_tel.delete(0, END)
@@ -133,7 +137,6 @@ def procurar():
     e_endereco.delete(0, END)
     c_curso.delete(0, END)
 
-    #inserindo os campos de entrada
     e_nome.insert(END, dados[1])
     e_email.insert(END, dados[2])
     e_tel.insert(END, dados[3])
@@ -142,15 +145,10 @@ def procurar():
     e_endereco.insert(END, dados[6])
     c_curso.insert(END, dados[7])
 
-    imagem = dados[8]
-    imagem_string = imagem
-
-    imagem = Image.open(imagem)
-    imagem = imagem.resize((130, 130))
-    imagem = ImageTk.PhotoImage(imagem)
-
-    l_imagem = Label(frame_detalhes, bg=co1, fg=co4)
-    l_imagem.place(x=390, y=10)
+    try:
+        exibir_imagem(dados[8])
+    except FileNotFoundError:
+        exibir_imagem('logo.png')
 
 # função atualizar
 def atualizar():
@@ -281,18 +279,10 @@ c_curso.place(x=224, y=160)
 # Função para escolher imagem
 
 def escolher_imagem():
-    global imagem, imagem_string, l_imagem
-
-    imagem = fd.askopenfilename()
-    imagem_string=imagem
-
-    imagem = Image.open(imagem)
-    imagem = imagem.resize((130, 130))
-    imagem = ImageTk.PhotoImage(imagem)
-    l_imagem = Label(frame_detalhes,  bg=co1, fg=co4)
-    l_imagem.place(x=390, y=10)
-
-    botao_carregar['text'] = 'Trocar de foto'
+    caminho = fd.askopenfilename()
+    if caminho:
+        exibir_imagem(caminho)
+        botao_carregar['text'] = 'Trocar de foto'
 
 botao_carregar = Button(frame_detalhes, command=escolher_imagem, text='Carregar Foto'.upper(), width=20, compound=CENTER, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co1, fg=co0)
 botao_carregar.place(x=390, y=160)
