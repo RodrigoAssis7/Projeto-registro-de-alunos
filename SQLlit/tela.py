@@ -6,6 +6,7 @@ from tkinter import messagebox
 from PIL import ImageTk, Image, ImageDraw
 from tkcalendar import DateEntry
 from main import *
+from datetime import date
 
 # ── Paleta ──────────────────────────────────────────────────────
 BG        = "#0f1117"   # fundo principal
@@ -110,7 +111,7 @@ def limpar_campos():
         w.delete(0, END)
     for cb in [c_sexo, c_curso]:
         cb.set("")
-    data_nascimento.set_date("2000-01-01")
+    data_nascimento.set_date(date(2000, 1, 1))
 
 def validar_id():
     val = e_procurar.get().strip()
