@@ -1,377 +1,390 @@
-# importando dependencias do tkinter
-from cProfile import label
 from tkinter.ttk import *
-from tkinter import*
+from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog as fd
-
-# importando pillow
-from PIL import ImageTk, Image
-
-# tk calendar
-from tkcalendar import Calendar, DateEntry
-from datetime import date
-
-#importando main
+from tkinter import messagebox
+from PIL import ImageTk, Image, ImageDraw
+from tkcalendar import DateEntry
 from main import *
 
-#cores
-co0 = "#2e2d2b"  # Preta
-co1 = "#feffff"  # Branca
-co2 = "#e5e5e5"  # grey
-co3 = "#00a095"  # Verde
-co4 = "#403d3d"   # letra
-co6 = "#003452"   # azul
-co7 = "#ef5350"   # vermelha
+# ── Paleta ──────────────────────────────────────────────────────
+BG        = "#0f1117"   # fundo principal
+SURFACE   = "#1a1d27"   # cards / paineis
+SURFACE2  = "#22263a"   # inputs / hover
+ACCENT    = "#4f8ef7"   # azul primário
+ACCENT2   = "#6c63ff"   # roxo secundário
+DANGER    = "#ef4444"   # vermelho
+SUCCESS   = "#22c55e"   # verde
+TEXT      = "#f1f5f9"   # texto principal
+TEXT2     = "#94a3b8"   # texto secundário
+BORDER    = "#2e3347"   # bordas
 
-co6 = "#146C94"   # azul
-co8 = "#263238"   # + verde
-co9 = "#e9edf5"   # + verde
-
-
-# criando janela
+# ── Janela ──────────────────────────────────────────────────────
 janela = Tk()
-janela.title("")
-janela.geometry('810x535')
-janela.configure(background=co1)
-janela.resizable(width=FALSE, height=FALSE)
+janela.title("Sistema de Registro de Alunos")
+janela.geometry("1000x680")
+janela.configure(bg=BG)
+janela.resizable(False, False)
 
-style = Style(janela)
+# ── Estilo ttk ──────────────────────────────────────────────────
+style = ttk.Style(janela)
 style.theme_use("clam")
 
+style.configure("Treeview",
+    background=SURFACE, foreground=TEXT,
+    fieldbackground=SURFACE, rowheight=32,
+    font=("Segoe UI", 10), borderwidth=0)
+style.configure("Treeview.Heading",
+    background=SURFACE2, foreground=TEXT2,
+    font=("Segoe UI", 9, "bold"), relief="flat")
+style.map("Treeview",
+    background=[("selected", ACCENT)],
+    foreground=[("selected", TEXT)])
+style.configure("Vertical.TScrollbar",
+    background=SURFACE2, troughcolor=SURFACE,
+    borderwidth=0, arrowsize=12)
+style.configure("TCombobox",
+    fieldbackground=SURFACE2, background=SURFACE2,
+    foreground=TEXT, selectbackground=ACCENT,
+    borderwidth=0, arrowcolor=TEXT2)
+style.map("TCombobox",
+    fieldbackground=[("readonly", SURFACE2)],
+    foreground=[("readonly", TEXT)])
+style.configure("DateEntry",
+    fieldbackground=SURFACE2, background=SURFACE2,
+    foreground=TEXT, borderwidth=0)
 
-# Criando frames
-frame_logo = Frame(janela, width=850, height=52, bg=co6)
-frame_logo.grid(row=0, column=0, pady=0, padx=0, sticky=NSEW, columnspan=5)
-
-frame_botoes = Frame(janela, width=100, height=200, bg=co1, relief=RAISED)
-frame_botoes.grid(row=1, column=0, pady=1, padx=0, sticky=NSEW)
-
-frame_detalhes = Frame(janela, width=800, height=100, bg=co1, relief=SOLID)
-frame_detalhes.grid(row=1, column=1, pady=1, padx=10, sticky=NSEW)
-
-frame_tabela = Frame(janela, width=800, height=100, bg=co1, relief=SOLID)
-frame_tabela.grid(row=3, column=0, pady=0, padx=10, sticky=NSEW, columnspan=5)
-
-# Logo frame----------------------------
-global imagem, imagem_string, l_imagem
-
-app_lg = Image.open('logo.png')
-app_lg = app_lg.resize((50,50))
-app_lg = ImageTk.PhotoImage(app_lg)
-app_logo = Label(frame_logo, image=app_lg, text="Sistema de Registro de Alunos", width=850, compound=LEFT, anchor=NW, font=('Verdane 15'), bg=co6, fg=co1)
-app_logo.place(x=5, y=0)
-
-#abrindo imagem
-
+# ── Estado global ────────────────────────────────────────────────
 imagem_string = "logo.png"
-imagem = Image.open('logo.png')
-imagem = imagem.resize((130, 130))
-imagem = ImageTk.PhotoImage(imagem)
-l_imagem = Label(frame_detalhes, image=imagem, bg=co1, fg=co4)
-l_imagem.image = imagem  # ← impede garbage collection
-l_imagem.place(x=390, y=10)
+imagem_ref    = None   # mantém referência pra não ser coletado pelo GC
 
-#-------------criando funçoes para CRUD-----------------
+# ── Helpers ──────────────────────────────────────────────────────
+def make_round_image(path, size=(120, 120)):
+    img  = Image.open(path).resize(size, Image.LANCZOS).convert("RGBA")
+    mask = Image.new("L", size, 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, *size), fill=255)
+    img.putalpha(mask)
+    return ImageTk.PhotoImage(img)
+
+def label(parent, text, fg=TEXT2, font=("Segoe UI", 9), **kw):
+    return Label(parent, text=text, fg=fg, bg=parent["bg"],
+                 font=font, **kw)
+
+def entry(parent, width=24):
+    e = Entry(parent, width=width, font=("Segoe UI", 10),
+              bg=SURFACE2, fg=TEXT, insertbackground=TEXT,
+              relief="flat", bd=0, highlightthickness=1,
+              highlightbackground=BORDER, highlightcolor=ACCENT)
+    return e
+
+def rounded_btn(parent, text, command, color=ACCENT, fg=TEXT,
+                width=16, font_size=9):
+    btn = Button(parent, text=text, command=command,
+                 bg=color, fg=fg, activebackground=color,
+                 activeforeground=fg, font=("Segoe UI", font_size, "bold"),
+                 width=width, relief="flat", bd=0, cursor="hand2",
+                 pady=7)
+    btn.bind("<Enter>", lambda e: btn.config(bg=_lighten(color)))
+    btn.bind("<Leave>", lambda e: btn.config(bg=color))
+    return btn
+
+def _lighten(hex_color):
+    r = min(255, int(hex_color[1:3], 16) + 20)
+    g = min(255, int(hex_color[3:5], 16) + 20)
+    b = min(255, int(hex_color[5:7], 16) + 20)
+    return f"#{r:02x}{g:02x}{b:02x}"
 
 def exibir_imagem(caminho):
-    global imagem, imagem_string, l_imagem
+    global imagem_ref, imagem_string
     imagem_string = caminho
-    imagem = Image.open(caminho)
-    imagem = imagem.resize((130, 130))
-    imagem = ImageTk.PhotoImage(imagem)
-    l_imagem.config(image=imagem)
-    l_imagem.image = imagem       
-
-#função adicionar
-def adicionar():
-    global imagem, imagem_string, l_imagem
-    global e_endereco
-
-    if 'imagem_string' not in globals():
+    try:
+        imagem_ref = make_round_image(caminho)
+    except Exception:
+        imagem_ref = make_round_image("logo.png")
         imagem_string = "logo.png"
+    l_imagem.config(image=imagem_ref)
+    l_imagem.image = imagem_ref
 
-    #obtendo os valores
-    nome = e_nome.get()
-    email = e_email.get()
-    tel = e_tel.get()
-    sexo = c_sexo.get()
-    data = data_nascimento.get()
-    endereco = e_endereco.get()
-    curso = c_curso.get()
-    img = imagem_string
+def limpar_campos():
+    for w in [e_nome, e_email, e_tel, e_endereco]:
+        w.delete(0, END)
+    for cb in [c_sexo, c_curso]:
+        cb.set("")
+    data_nascimento.set_date("2000-01-01")
 
-    lista = [nome, email, tel, sexo, data, endereco, curso, img]
+def validar_id():
+    val = e_procurar.get().strip()
+    if not val:
+        messagebox.showerror("Erro", "Informe o ID do aluno.")
+        return None
+    try:
+        return int(val)
+    except ValueError:
+        messagebox.showerror("Erro", "ID inválido.")
+        return None
 
-    #verificando se contem valor vazio
-    for i in lista:
-        if i=='':
-            messagebox.showerror('Erro', 'Preencha todos os campos')
-            return
+# ── Layout principal ─────────────────────────────────────────────
+# Sidebar esquerda
+sidebar = Frame(janela, bg=SURFACE, width=220)
+sidebar.pack(side=LEFT, fill=Y, padx=0, pady=0)
+sidebar.pack_propagate(False)
 
-    #registrando os valores
-    sistema_de_registro.register_estudent(lista)
+# Área principal
+main_area = Frame(janela, bg=BG)
+main_area.pack(side=LEFT, fill=BOTH, expand=True)
 
-    #limpamdo os campos de entrada
-    e_nome.delete(0, END)
-    e_email.delete(0, END)
-    e_tel.delete(0, END)
-    c_sexo.delete(0, END)
-    data_nascimento.delete(0, END)
-    e_endereco.delete(0, END)
-    c_curso.delete(0, END)
+# Formulário + foto (topo)
+form_frame = Frame(main_area, bg=SURFACE, pady=20, padx=20)
+form_frame.pack(fill=X, padx=16, pady=(16, 8))
 
-    #mostrando os valores
+# Tabela (baixo)
+table_frame = Frame(main_area, bg=SURFACE)
+table_frame.pack(fill=BOTH, expand=True, padx=16, pady=(0, 16))
+
+# ── Sidebar: logo + título ────────────────────────────────────────
+try:
+    _lg = Image.open("logo.png").resize((54, 54))
+    _lg = ImageTk.PhotoImage(_lg)
+    Label(sidebar, image=_lg, bg=SURFACE).pack(pady=(28, 6))
+    sidebar._lg = _lg
+except Exception:
+    pass
+
+Label(sidebar, text="EduRegister", fg=TEXT,
+      bg=SURFACE, font=("Segoe UI", 13, "bold")).pack()
+Label(sidebar, text="Sistema de Alunos", fg=TEXT2,
+      bg=SURFACE, font=("Segoe UI", 8)).pack(pady=(0, 24))
+
+Frame(sidebar, bg=BORDER, height=1).pack(fill=X, padx=16, pady=4)
+
+# ── Sidebar: busca ────────────────────────────────────────────────
+Label(sidebar, text="BUSCAR ALUNO", fg=TEXT2, bg=SURFACE,
+      font=("Segoe UI", 8, "bold")).pack(pady=(20, 4), padx=16, anchor=W)
+
+search_row = Frame(sidebar, bg=SURFACE)
+search_row.pack(fill=X, padx=16, pady=4)
+
+e_procurar = Entry(search_row, width=7, font=("Segoe UI", 10),
+                   bg=SURFACE2, fg=TEXT, insertbackground=TEXT,
+                   relief="flat", bd=0, highlightthickness=1,
+                   highlightbackground=BORDER, highlightcolor=ACCENT)
+e_procurar.pack(side=LEFT, padx=(0, 6), pady=4, ipady=5, fill=X, expand=True)
+
+rounded_btn(search_row, "→", lambda: procurar(),
+            color=ACCENT, width=3).pack(side=LEFT, pady=4)
+
+Frame(sidebar, bg=BORDER, height=1).pack(fill=X, padx=16, pady=16)
+
+# ── Sidebar: botões CRUD ──────────────────────────────────────────
+Label(sidebar, text="AÇÕES", fg=TEXT2, bg=SURFACE,
+      font=("Segoe UI", 8, "bold")).pack(pady=(0, 8), padx=16, anchor=W)
+
+def _side_btn(text, cmd, color=SURFACE2, fg=TEXT):
+    f = Frame(sidebar, bg=SURFACE)
+    f.pack(fill=X, padx=16, pady=3)
+    b = Button(f, text=text, command=cmd, bg=color, fg=fg,
+               activebackground=_lighten(color), activeforeground=fg,
+               font=("Segoe UI", 10), width=20, relief="flat",
+               bd=0, cursor="hand2", pady=8, anchor=W, padx=12)
+    b.pack(fill=X)
+    b.bind("<Enter>", lambda e: b.config(bg=_lighten(color)))
+    b.bind("<Leave>", lambda e: b.config(bg=color))
+    return b
+
+btn_adicionar = _side_btn("＋  Adicionar", lambda: adicionar(), ACCENT)
+btn_atualizar = _side_btn("✎  Atualizar",  lambda: atualizar(), ACCENT2)
+btn_deletar   = _side_btn("✕  Deletar",    lambda: deletar(),   DANGER)
+
+Frame(sidebar, bg=BORDER, height=1).pack(fill=X, padx=16, pady=16)
+
+# ── Foto do aluno (sidebar inferior) ─────────────────────────────
+Label(sidebar, text="FOTO DO ALUNO", fg=TEXT2, bg=SURFACE,
+      font=("Segoe UI", 8, "bold")).pack(pady=(0, 8), padx=16, anchor=W)
+
+try:
+    imagem_ref = make_round_image("logo.png")
+except Exception:
+    imagem_ref = None
+
+l_imagem = Label(sidebar, image=imagem_ref, bg=SURFACE)
+l_imagem.image = imagem_ref
+l_imagem.pack(pady=(0, 8))
+
+foto_row = Frame(sidebar, bg=SURFACE)
+foto_row.pack(fill=X, padx=16)
+
+def escolher_imagem():
+    caminho = fd.askopenfilename(
+        filetypes=[("Imagens", "*.png *.jpg *.jpeg *.bmp *.gif")])
+    if caminho:
+        exibir_imagem(caminho)
+
+def remover_imagem():
+    exibir_imagem("logo.png")
+
+Button(foto_row, text="Carregar", command=escolher_imagem,
+       bg=SURFACE2, fg=TEXT2, activebackground=BORDER, activeforeground=TEXT,
+       font=("Segoe UI", 8), relief="flat", bd=0, cursor="hand2",
+       pady=5, padx=8).pack(side=LEFT, expand=True, fill=X, padx=(0, 4))
+
+Button(foto_row, text="Remover", command=remover_imagem,
+       bg=SURFACE2, fg=DANGER, activebackground=BORDER, activeforeground=DANGER,
+       font=("Segoe UI", 8), relief="flat", bd=0, cursor="hand2",
+       pady=5, padx=8).pack(side=LEFT, expand=True, fill=X)
+
+# ── Formulário: grid de campos ────────────────────────────────────
+Label(form_frame, text="Dados do Aluno", fg=TEXT,
+      bg=SURFACE, font=("Segoe UI", 12, "bold")).grid(
+      row=0, column=0, columnspan=6, sticky=W, pady=(0, 14))
+
+def campo(parent, row, col, label_text, widget):
+    Label(parent, text=label_text, fg=TEXT2, bg=SURFACE,
+          font=("Segoe UI", 8, "bold")).grid(
+          row=row, column=col, sticky=W, pady=(0, 2), padx=(0, 16))
+    widget.grid(row=row+1, column=col, sticky=W, pady=(0, 12),
+                padx=(0, 16), ipady=5)
+
+e_nome     = entry(form_frame, 22)
+e_email    = entry(form_frame, 22)
+e_tel      = entry(form_frame, 14)
+e_endereco = entry(form_frame, 18)
+
+c_sexo = ttk.Combobox(form_frame, width=6,
+    font=("Segoe UI", 10), justify="center", state="readonly")
+c_sexo["values"] = ("M", "F")
+
+c_curso = ttk.Combobox(form_frame, width=16,
+    font=("Segoe UI", 10), justify="center", state="readonly")
+c_curso["values"] = ("Engenharia", "Medicina", "T.I.", "Designer", "Outros")
+
+data_nascimento = DateEntry(form_frame, width=14,
+    font=("Segoe UI", 10), justify="center",
+    background=ACCENT, foreground=TEXT,
+    borderwidth=0, year=2000,
+    headersbackground=ACCENT, headersforeground=TEXT,
+    selectbackground=ACCENT, selectforeground=TEXT,
+    normalbackground=SURFACE2, normalforeground=TEXT,
+    weekendbackground=SURFACE2, weekendforeground=TEXT2,
+    othermonthbackground=SURFACE, othermonthforeground=TEXT2)
+
+campo(form_frame, 1, 0, "NOME",              e_nome)
+campo(form_frame, 1, 1, "EMAIL",             e_email)
+campo(form_frame, 1, 2, "TELEFONE",          e_tel)
+campo(form_frame, 3, 0, "ENDEREÇO",          e_endereco)
+campo(form_frame, 3, 1, "CURSO",             c_curso)
+campo(form_frame, 3, 2, "DATA NASCIMENTO",   data_nascimento)
+campo(form_frame, 3, 3, "SEXO",              c_sexo)
+
+# ── Tabela ────────────────────────────────────────────────────────
+cols = ["ID", "Nome", "Email", "Telefone", "Sexo", "Nascimento", "Endereço", "Curso"]
+
+Label(table_frame, text="Alunos Cadastrados", fg=TEXT,
+      bg=SURFACE, font=("Segoe UI", 11, "bold")).pack(
+      anchor=W, padx=16, pady=(12, 6))
+
+tree_container = Frame(table_frame, bg=SURFACE)
+tree_container.pack(fill=BOTH, expand=True, padx=16, pady=(0, 16))
+
+tree = ttk.Treeview(tree_container, columns=cols,
+                    show="headings", selectmode="browse")
+
+widths = [40, 130, 150, 80, 50, 90, 120, 90]
+for col, w in zip(cols, widths):
+    tree.heading(col, text=col)
+    tree.column(col, width=w, anchor=CENTER if w <= 90 else W)
+
+vsb = ttk.Scrollbar(tree_container, orient=VERTICAL, command=tree.yview)
+hsb = ttk.Scrollbar(tree_container, orient=HORIZONTAL, command=tree.xview)
+tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+tree.grid(row=0, column=0, sticky=NSEW)
+vsb.grid(row=0, column=1, sticky=NS)
+hsb.grid(row=1, column=0, sticky=EW)
+tree_container.rowconfigure(0, weight=1)
+tree_container.columnconfigure(0, weight=1)
+
+# ── CRUD ──────────────────────────────────────────────────────────
+def mostrar_aluno():
+    for row in tree.get_children():
+        tree.delete(row)
+    for item in sistema_de_registro.view_all_students():
+        tree.insert("", END, values=item[:-1])
+
+def adicionar():
+    nome     = e_nome.get().strip()
+    email    = e_email.get().strip()
+    tel      = e_tel.get().strip()
+    sexo     = c_sexo.get()
+    data     = data_nascimento.get()
+    endereco = e_endereco.get().strip()
+    curso    = c_curso.get()
+    img      = imagem_string
+
+    if any(v == "" for v in [nome, email, tel, sexo, data, endereco, curso]):
+        messagebox.showerror("Erro", "Preencha todos os campos.")
+        return
+
+    sistema_de_registro.register_estudent(
+        [nome, email, tel, sexo, data, endereco, curso, img])
+    limpar_campos()
+    exibir_imagem("logo.png")
     mostrar_aluno()
 
-#funcao procurar
 def procurar():
-    id_aluno = int(e_procurar.get())
+    id_aluno = validar_id()
+    if id_aluno is None:
+        return
     dados = sistema_de_registro.search_student(id_aluno)
-
-    e_nome.delete(0, END)
-    e_email.delete(0, END)
-    e_tel.delete(0, END)
-    c_sexo.delete(0, END)
-    data_nascimento.delete(0, END)
-    e_endereco.delete(0, END)
-    c_curso.delete(0, END)
-
+    if not dados:
+        messagebox.showerror("Erro", f"Aluno ID {id_aluno} não encontrado.")
+        return
+    limpar_campos()
     e_nome.insert(END, dados[1])
     e_email.insert(END, dados[2])
     e_tel.insert(END, dados[3])
-    c_sexo.insert(END, dados[4])
-    data_nascimento.insert(END, dados[5])
+    c_sexo.set(dados[4])
+    data_nascimento.set_date(dados[5])
     e_endereco.insert(END, dados[6])
-    c_curso.insert(END, dados[7])
-
+    c_curso.set(dados[7])
     try:
         exibir_imagem(dados[8])
     except FileNotFoundError:
-        exibir_imagem('logo.png')
+        exibir_imagem("logo.png")
 
-# função atualizar
 def atualizar():
-    global imagem, imagem_string, l_imagem
-    global e_endereco
+    id_aluno = validar_id()
+    if id_aluno is None:
+        return
+    nome     = e_nome.get().strip()
+    email    = e_email.get().strip()
+    tel      = e_tel.get().strip()
+    sexo     = c_sexo.get()
+    data     = data_nascimento.get()
+    endereco = e_endereco.get().strip()
+    curso    = c_curso.get()
+    img      = imagem_string
 
-    # OBTENDO O ID
-    id_aluno = int(e_procurar.get())
-
-    #obtendo os valores
-    nome = e_nome.get()
-    email = e_email.get()
-    tel = e_tel.get()
-    sexo = c_sexo.get()
-    data = data_nascimento.get()
-    endereco = e_endereco.get()
-    curso = c_curso.get()
-    img = imagem_string
-
-    lista = [nome, email, tel, sexo, data, endereco, curso, img, id_aluno]
-
-    #verificando se contem valor vazio
-    for i in lista:
-        if i=='':
-            messagebox.showerror('Erro', 'Preencha todos os campos')
-            return
-
-    #registrando os valores
-    sistema_de_registro.update_students(lista)
-
-    #limpamdo os campos de entrada
-    e_nome.delete(0, END)
-    e_email.delete(0, END)
-    e_tel.delete(0, END)
-    c_sexo.delete(0, END)
-    data_nascimento.delete(0, END)
-    e_endereco.delete(0, END)
-    c_curso.delete(0, END)
-
-#abrindo a imagem
-    imagem = Image.open('logo.png')
-    imagem = imagem.resize((130, 130))
-    imagem = ImageTk.PhotoImage(imagem)
-
-    l_imagem = Label(frame_detalhes, bg=co1, fg=co4)
-    l_imagem.place(x=390, y=10)
-
-    #mostrando os valores
-    mostrar_aluno()
-
-
-# função deletar
-def deletar():
-    global imagem_string
-
-    if e_procurar.get() == '':
-        messagebox.showerror('Erro', 'Informe o ID do aluno')
+    if any(v == "" for v in [nome, email, tel, sexo, data, endereco, curso]):
+        messagebox.showerror("Erro", "Preencha todos os campos.")
         return
 
-    id_aluno = int(e_procurar.get())
-    # ... resto da função continua igual
-
-    #deletando o aluno
-    sistema_de_registro.delete_student(id_aluno)
-
-    #limpamdo os campos de entrada
-    e_nome.delete(0, END)
-    e_email.delete(0, END)
-    e_tel.delete(0, END)
-    c_sexo.delete(0, END)
-    data_nascimento.delete(0, END)
-    e_endereco.delete(0, END)
-    c_curso.delete(0, END)
-
-    e_procurar.delete(0, END)
-
-#abrindo a imagem
-    imagem = Image.open('logo.png')
-    imagem = imagem.resize((130, 130))
-    imagem = ImageTk.PhotoImage(imagem)
-
-    l_imagem = Label(frame_detalhes, bg=co1, fg=co4)
-    l_imagem.place(x=390, y=10)
-
-    #mostrando os valores
+    sistema_de_registro.update_students(
+        [nome, email, tel, sexo, data, endereco, curso, img, id_aluno])
+    limpar_campos()
+    exibir_imagem("logo.png")
     mostrar_aluno()
 
-#criando campos de entrada-------------------------
+def deletar():
+    id_aluno = validar_id()
+    if id_aluno is None:
+        return
+    if not messagebox.askyesno("Confirmar", f"Deletar aluno ID {id_aluno}?"):
+        return
+    sistema_de_registro.delete_student(id_aluno)
+    limpar_campos()
+    e_procurar.delete(0, END)
+    exibir_imagem("logo.png")
+    mostrar_aluno()
 
-l_nome = Label(frame_detalhes, text="Nome *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
-l_nome.place(x=4, y=10)
-e_nome = Entry(frame_detalhes, width=30, justify='left', relief='solid')
-e_nome.place(x=7, y=40)
-
-l_email = Label(frame_detalhes, text="Email *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
-l_email.place(x=4, y=70)
-e_email = Entry(frame_detalhes, width=30, justify='left', relief='solid')
-e_email.place(x=7, y=100)
-
-l_tel = Label(frame_detalhes, text="Telefone *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
-l_tel.place(x=4, y=130)
-e_tel = Entry(frame_detalhes, width=15, justify='left', relief='solid')
-e_tel.place(x=7, y=160)
-
-l_sexo = Label(frame_detalhes, text="Sexo *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
-l_sexo.place(x=127, y=130)
-c_sexo = ttk.Combobox(frame_detalhes, width=7, font=('Ivy 8 bold'), justify='center')
-c_sexo['values'] = ('M', 'F')
-c_sexo.place(x=130, y=160)
-
-l_data_de_nascimento = Label(frame_detalhes, text="Data de Nascimento *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
-l_data_de_nascimento.place(x=220, y=10)
-data_nascimento = DateEntry(frame_detalhes, width=18, justify='center', background='darkblue', foreground='white', borderwidth=2, year=2023)
-data_nascimento.place(x=224, y=40)
-
-l_endereco = Label(frame_detalhes, text="Endereço *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
-l_endereco.place(x=220, y=70)
-
-e_endereco = Entry(frame_detalhes, width=20, justify='left', relief='solid')
-e_endereco.place(x=224, y=100)
-
-
-cursos = ['Engenharia', 'Medicina', 'T.I.', 'Designer', 'Outros']
-
-l_curso = Label(frame_detalhes, text="Curso *", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
-l_curso.place(x=220, y=130)
-c_curso = ttk.Combobox(frame_detalhes, width=20, font=('Ivy 8 bold'), justify='center')
-c_curso['values'] = (cursos)
-c_curso.place(x=224, y=160)
-
-# Função para escolher imagem
-
-def escolher_imagem():
-    caminho = fd.askopenfilename()
-    if caminho:
-        exibir_imagem(caminho)
-        botao_carregar['text'] = 'Trocar de foto'
-
-botao_carregar = Button(frame_detalhes, command=escolher_imagem, text='Carregar Foto'.upper(), width=20, compound=CENTER, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co1, fg=co0)
-botao_carregar.place(x=390, y=160)
-
-def remover_imagem():
-    global imagem_string
-    imagem_string = 'logo.png'
-    exibir_imagem('logo.png')
-    botao_carregar['text'] = 'Carregar Foto'
-
-botao_remover = Button(frame_detalhes, command=remover_imagem, text='Remover Foto'.upper(), width=20, compound=CENTER, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co7, fg=co1)
-botao_remover.place(x=390, y=190)
-
-# Tabela aluno
-
-def mostrar_aluno(registration_system=None):
-
-    list_header = ['id','nome', 'email', 'telefone', 'sexo', 'data', 'endereço', 'curso']
-
-    df_list = sistema_de_registro.view_all_students()
-
-    tree_aluno = ttk.Treeview(frame_tabela, selectmode="extended",columns=list_header, show='headings')
-
-    vbs = ttk.Scrollbar(frame_tabela, orient="vertical", command=tree_aluno.yview)
-    hsb = ttk.Scrollbar(frame_tabela, orient="horizontal", command=tree_aluno.xview)
-
-    tree_aluno.configure(yscrollcommand=vbs.set, xscrollcommand=hsb.set)
-    tree_aluno.grid(column=0, row=1, sticky='nsew')
-    vbs.grid(column=1, row=1, sticky='ns')
-    hsb.grid(column=0, row=2, sticky='ew')
-    frame_tabela.grid_rowconfigure(0, weight=12)
-
-    hd=['nw','nw','nw','center','center','center','center','center','center']
-    h=[40,150,150,70,70,70,120,100,100]
-    n=0
-
-    for col in list_header:
-     tree_aluno.heading(col, text=col.title(), anchor=NW)
-     tree_aluno.column(col, width=h[n], anchor=hd[n])
-
-     n+=1
-    for item in df_list:
-        tree_aluno.insert('','end', values=item)
-
-
-
-#procurar aluno------------------------
-
-frame_procurar = Frame(frame_botoes, width=40, height=55, bg=co1, relief=RAISED)
-frame_procurar.grid(row=0, column=0, pady=10, padx=10, sticky=NSEW)
-
-l_nome = Label(frame_procurar, text="Procurar aluno [Entra ID]", anchor=NW, font=('Ivy 10'), bg=co1, fg=co4)
-l_nome.grid(row=0, column=0, pady=10, padx=0, sticky=NSEW)
-e_procurar = Entry(frame_procurar, width=5, justify='center', relief='solid', font=('Ivy 10'))
-e_procurar.grid(row=1, column=0, pady=10, padx=0, sticky=NSEW)
-
-botao_procurar = Button(frame_procurar,command= procurar, text='Procurar', width=9, anchor=CENTER, overrelief=RIDGE, font=('Ivy 7 bold'), bg=co1, fg=co0)
-botao_procurar.grid(row=1, column=1, pady=10, padx=0, sticky=NSEW)
-
-
-# Botoes --------------
-
-app_img_adicionar = Image.open('add.png')
-app_img_adicionar = app_img_adicionar.resize((25,25))
-app_img_adicionar = ImageTk.PhotoImage(app_img_adicionar)
-app_adicionar = Button(frame_botoes,command=adicionar,image=app_img_adicionar, text=' adicionar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
-app_adicionar.grid(row=1, column=0, pady=5, padx=10, sticky=NSEW)
-
-app_img_atualizar = Image.open('update.png')
-app_img_atualizar = app_img_atualizar.resize((25,25))
-app_img_atualizar = ImageTk.PhotoImage(app_img_atualizar)
-app_atualizar  = Button(frame_botoes,command= atualizar, image=app_img_atualizar, text=' Atualizar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
-app_atualizar .grid(row=2, column=0, pady=5, padx=10, sticky=NSEW)
-
-app_img_deletar = Image.open('delete.png')
-app_img_deletar = app_img_deletar.resize((25,25))
-app_img_deletar = ImageTk.PhotoImage(app_img_deletar)
-app_deletar = Button(frame_botoes,command= deletar, image=app_img_deletar, text=' Deletar', width=100, compound=LEFT, overrelief=RIDGE, font=('Ivy 11'), bg=co1, fg=co0)
-app_deletar.grid(row=3, column=0, pady=5, padx=10, sticky=NSEW)
-
-#linha de separação
-l_linha= Label(frame_botoes, width=1, height=123, anchor=NW,font=('Ivy 1'), bg=co2, fg=co2)
-l_linha.place(x=230, y=15)
-
-
-#chamar a tabela
 mostrar_aluno()
-
 janela.mainloop()
